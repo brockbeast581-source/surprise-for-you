@@ -11,20 +11,24 @@ body, html {
   font-family: Arial, sans-serif;
   background:#ffeef0;
   overflow-x:hidden;
+  text-align:center;
 }
-.page { text-align:center; padding:50px 20px; }
+
+.page { display:none; padding:50px 20px; }
+.page.active { display:block; }
+
 h1, h2 { color:#ff4b6e; margin-bottom:20px; }
 
 /* ---------------- Buttons ---------------- */
 button {
-  padding:12px 25px;
+  padding:10px 20px;
   background:#ff4b6e;
   color:white;
   border:none;
   border-radius:10px;
   font-size:1rem;
   cursor:pointer;
-  margin-top:20px;
+  margin:10px;
 }
 button:hover { background:#ff2d57; }
 
@@ -51,10 +55,33 @@ button:hover { background:#ff2d57; }
 }
 
 /* ---------------- Slideshow ---------------- */
-.slideshow img {
-  max-width:90%;
+.slideshow-container {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.slide-img {
+  width: 80%;
+  max-width: 500px;
   border-radius:15px;
-  display:none;
+  margin-bottom:10px;
+}
+
+.caption {
+  font-size:1.1rem;
+  color:#333;
+  margin-bottom:15px;
+}
+
+.nav-buttons {
+  display:flex;
+  justify-content:space-between;
+  width:80%;
+  max-width:500px;
 }
 
 /* ---------------- Typing ---------------- */
@@ -70,41 +97,36 @@ button:hover { background:#ff2d57; }
 <body>
 
 <!-- ---------------- Page 1: Start / Play ---------------- -->
-<div class="page" id="page1">
+<div class="page active" id="page1">
   <h1>🎉 Birthday Surprise 🎉</h1>
   <button id="startBtn">Start</button>
 </div>
 
 <!-- ---------------- Page 2: Photo Slideshow ---------------- -->
-<div class="page" id="page2" style="display:none;">
-  <div class="slideshow">
-    <img src="photo1.jpg" class="slide" style="display:block;">
-    <img src="photo2.jpg" class="slide">
-    <img src="photo3.jpg" class="slide">
-    <img src="photo4.jpg" class="slide">
-    <img src="photo5.jpg" class="slide">
-    <img src="photo6.jpg" class="slide">
-    <img src="photo7.jpg" class="slide">
-    <img src="photo8.jpg" class="slide">
-    <img src="photo9.jpg" class="slide">
-    <img src="photo10.jpg" class="slide">
+<div class="page" id="page2">
+  <div class="slideshow-container">
+    <img src="photo1.jpg" class="slide-img" id="slideImage">
+    <div class="caption" id="slideCaption">Caption for photo 1</div>
+    <div class="nav-buttons">
+      <button id="prevBtn">Previous</button>
+      <button id="nextBtn">Next</button>
+    </div>
   </div>
-  <button onclick="nextPage()">Next</button>
 </div>
 
 <!-- ---------------- Page 3: Typing Paragraph ---------------- -->
-<div class="page" id="page3" style="display:none;">
+<div class="page" id="page3">
   <h2>Things I Love About You</h2>
   <p id="typing"></p>
-  <button onclick="nextPage()">Next</button>
+  <button onclick="showPage(4)">Next</button>
 </div>
 
 <!-- ---------------- Page 4: Surprise Video ---------------- -->
-<div class="page" id="page4" style="display:none;">
+<div class="page" id="page4">
   <h2>🎁 Surprise! 🎁</h2>
   <div id="confetti"></div>
   <button id="revealVideo">Reveal Video</button>
-  <video id="surpriseVideo" width="100%" controls style="display:none;">
+  <video id="surpriseVideo" width="80%" controls style="display:none; margin-top:15px;">
     <source src="video.mp4" type="video/mp4">
   </video>
 </div>
@@ -117,13 +139,13 @@ button:hover { background:#ff2d57; }
 const bgSong = document.getElementById("bgSong");
 const heartsContainer = document.getElementById("hearts");
 const confettiContainer = document.getElementById("confetti");
+
 let currentPage = 1;
 
 // ---------------- Page Navigation ----------------
 function showPage(pageNum){
-  for(let i=1;i<=4;i++){
-    document.getElementById("page"+i).style.display = (i===pageNum)? "block":"none";
-  }
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page"+pageNum).classList.add("active");
   currentPage = pageNum;
 }
 
@@ -145,24 +167,32 @@ function createHeart(){
 setInterval(createHeart,300);
 
 // ---------------- Slideshow ----------------
-let slideIndex = 0;
-const slides = document.querySelectorAll(".slide");
-function showSlides(){
-  slides.forEach((s)=>s.style.display="none");
-  slideIndex = (slideIndex+1)%slides.length;
-  slides[slideIndex].style.display="block";
-}
-setInterval(showSlides,3000);
+const images = ["photo1.jpg","photo2.jpg","photo3.jpg","photo4.jpg","photo5.jpg","photo6.jpg","photo7.jpg","photo8.jpg","photo9.jpg","photo10.jpg"];
+const captions = [
+  "Caption 1","Caption 2","Caption 3","Caption 4","Caption 5",
+  "Caption 6","Caption 7","Caption 8","Caption 9","Caption 10"
+];
 
-// ---------------- Next Page Button ----------------
-function nextPage(){
-  if(currentPage===2){
-    showPage(3);
-    startTyping();
-  } else if(currentPage===3){
-    showPage(4);
-  }
+let slideIndex = 0;
+const slideImage = document.getElementById("slideImage");
+const slideCaption = document.getElementById("slideCaption");
+
+function showSlide(index){
+  slideImage.src = images[index];
+  slideCaption.textContent = captions[index];
 }
+
+document.getElementById("prevBtn").addEventListener("click", ()=>{
+  slideIndex = (slideIndex-1+images.length)%images.length;
+  showSlide(slideIndex);
+});
+document.getElementById("nextBtn").addEventListener("click", ()=>{
+  slideIndex = (slideIndex+1)%images.length;
+  showSlide(slideIndex);
+});
+
+// Initialize first slide
+showSlide(slideIndex);
 
 // ---------------- Typing Animation ----------------
 const typingText = "Sometimes life gives us moments that feel small, yet they carry the biggest pieces of our hearts. Every smile, every memory, every quiet laugh becomes a story only we can tell. Through ups and downs, the little joys stay with us, making the ordinary feel extraordinary.";
@@ -178,7 +208,7 @@ function startTyping(){
   },40);
 }
 
-// ---------------- Surprise Video Reveal ----------------
+// ---------------- Reveal Video ----------------
 document.getElementById("revealVideo").addEventListener("click", ()=>{
   // Confetti & hearts
   for(let i=0;i<100;i++){
@@ -192,6 +222,5 @@ document.getElementById("revealVideo").addEventListener("click", ()=>{
   document.getElementById("surpriseVideo").style.display="block";
 });
 </script>
-
 </body>
 </html>
