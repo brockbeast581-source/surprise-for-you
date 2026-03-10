@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Surprise</title>
+<style>
+/* ---------------- General ---------------- */
+body, html {
+  margin:0; padding:0;
+  font-family: Arial, sans-serif;
+  background:#ffeef0;
+  overflow-x:hidden;
+}
+.page { text-align:center; padding:50px 20px; }
+h1, h2 { color:#ff4b6e; margin-bottom:20px; }
+
+/* ---------------- Buttons ---------------- */
+button {
+  padding:12px 25px;
+  background:#ff4b6e;
+  color:white;
+  border:none;
+  border-radius:10px;
+  font-size:1rem;
+  cursor:pointer;
+  margin-top:20px;
+}
+button:hover { background:#ff2d57; }
+
+/* ---------------- Hearts & Confetti ---------------- */
+#hearts, #confetti {
+  position:fixed;
+  bottom:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:-1;
+}
+.heart, .confettiPiece {
+  position:absolute;
+  width:20px; height:20px;
+  background:red;
+  clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 50% 80%, 20% 100%, 0% 35%);
+  animation: float 5s linear infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-200px) scale(1.2); }
+  100% { transform: translateY(0px) scale(1); }
+}
+
+/* ---------------- Slideshow ---------------- */
+.slideshow img {
+  max-width:90%;
+  border-radius:15px;
+  display:none;
+}
+
+/* ---------------- Typing ---------------- */
+#typing {
+  font-size:1.2rem;
+  color:#333;
+  max-width:600px;
+  margin:20px auto;
+  min-height:80px;
+}
+</style>
+</head>
+<body>
+
+<!-- ---------------- Page 1: Start / Play ---------------- -->
+<div class="page" id="page1">
+  <h1>🎉 Birthday Surprise 🎉</h1>
+  <button id="startBtn">Start</button>
+</div>
+
+<!-- ---------------- Page 2: Photo Slideshow ---------------- -->
+<div class="page" id="page2" style="display:none;">
+  <div class="slideshow">
+    <img src="photo1.jpg" class="slide" style="display:block;">
+    <img src="photo2.jpg" class="slide">
+    <img src="photo3.jpg" class="slide">
+    <img src="photo4.jpg" class="slide">
+    <img src="photo5.jpg" class="slide">
+    <img src="photo6.jpg" class="slide">
+    <img src="photo7.jpg" class="slide">
+    <img src="photo8.jpg" class="slide">
+    <img src="photo9.jpg" class="slide">
+    <img src="photo10.jpg" class="slide">
+  </div>
+  <button onclick="nextPage()">Next</button>
+</div>
+
+<!-- ---------------- Page 3: Typing Paragraph ---------------- -->
+<div class="page" id="page3" style="display:none;">
+  <h2>Things I Love About You</h2>
+  <p id="typing"></p>
+  <button onclick="nextPage()">Next</button>
+</div>
+
+<!-- ---------------- Page 4: Surprise Video ---------------- -->
+<div class="page" id="page4" style="display:none;">
+  <h2>🎁 Surprise! 🎁</h2>
+  <div id="confetti"></div>
+  <button id="revealVideo">Reveal Video</button>
+  <video id="surpriseVideo" width="100%" controls style="display:none;">
+    <source src="video.mp4" type="video/mp4">
+  </video>
+</div>
+
+<audio id="bgSong" src="song.mp3"></audio>
+<div id="hearts"></div>
+
+<script>
+// ---------------- Globals ----------------
+const bgSong = document.getElementById("bgSong");
+const heartsContainer = document.getElementById("hearts");
+const confettiContainer = document.getElementById("confetti");
+let currentPage = 1;
+
+// ---------------- Page Navigation ----------------
+function showPage(pageNum){
+  for(let i=1;i<=4;i++){
+    document.getElementById("page"+i).style.display = (i===pageNum)? "block":"none";
+  }
+  currentPage = pageNum;
+}
+
+// ---------------- Start Button ----------------
+document.getElementById("startBtn").addEventListener("click", ()=>{
+  bgSong.play().catch(err=>console.log("Autoplay blocked:", err));
+  showPage(2);
+});
+
+// ---------------- Heart Animation ----------------
+function createHeart(){
+  const heart = document.createElement("div");
+  heart.classList.add("heart");
+  heart.style.left = Math.random()*100+"%";
+  heart.style.animationDuration = 3+Math.random()*2+"s";
+  heartsContainer.appendChild(heart);
+  setTimeout(()=>heart.remove(),5000);
+}
+setInterval(createHeart,300);
+
+// ---------------- Slideshow ----------------
+let slideIndex = 0;
+const slides = document.querySelectorAll(".slide");
+function showSlides(){
+  slides.forEach((s)=>s.style.display="none");
+  slideIndex = (slideIndex+1)%slides.length;
+  slides[slideIndex].style.display="block";
+}
+setInterval(showSlides,3000);
+
+// ---------------- Next Page Button ----------------
+function nextPage(){
+  if(currentPage===2){
+    showPage(3);
+    startTyping();
+  } else if(currentPage===3){
+    showPage(4);
+  }
+}
+
+// ---------------- Typing Animation ----------------
+const typingText = "Sometimes life gives us moments that feel small, yet they carry the biggest pieces of our hearts. Every smile, every memory, every quiet laugh becomes a story only we can tell. Through ups and downs, the little joys stay with us, making the ordinary feel extraordinary.";
+function startTyping(){
+  const typingEl = document.getElementById("typing");
+  let i=0;
+  typingEl.innerHTML="";
+  const interval = setInterval(()=>{
+    if(i<typingText.length){
+      typingEl.innerHTML += typingText.charAt(i);
+      i++;
+    } else clearInterval(interval);
+  },40);
+}
+
+// ---------------- Surprise Video Reveal ----------------
+document.getElementById("revealVideo").addEventListener("click", ()=>{
+  // Confetti & hearts
+  for(let i=0;i<100;i++){
+    const confetti = document.createElement("div");
+    confetti.classList.add("confettiPiece");
+    confetti.style.left = Math.random()*100+"%";
+    confetti.style.background = ["#ff4b6e","#ffb347","#fffc47","#47fffc"][Math.floor(Math.random()*4)];
+    confettiContainer.appendChild(confetti);
+    setTimeout(()=>confetti.remove(),2000);
+  }
+  document.getElementById("surpriseVideo").style.display="block";
+});
+</script>
+
+</body>
+</html>
